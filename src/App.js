@@ -202,7 +202,7 @@ function App() {
         </div>
         
         <div className="balance-card">
-          <h2>Debt Payments</h2>
+          <h2>Debt</h2>
           {editingDebt ? (
             <form onSubmit={handleDebtBalanceSubmit} className="balance-edit-form">
               <div className="form-group">
@@ -336,7 +336,7 @@ function App() {
                 
                 {/* Add debt categories when expense is selected */}
                 {type === 'expense' && (
-                  <optgroup label="Debt Payments">
+                  <optgroup label="Debt">
                     {debtCategories.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
