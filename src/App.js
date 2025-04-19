@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import Login from './components/Login';
+import Header from './components/Header';
 import Charts from './components/Charts';
 import './App.css';
 
@@ -259,6 +260,7 @@ function App() {
   return (
     <Router>
       <div className="App">
+        <Header user={user} />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route 
