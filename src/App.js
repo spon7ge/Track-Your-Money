@@ -121,21 +121,45 @@ function App() {
     if (!description || !amount) return;
     
     const today = new Date();
+    const amountNum = parseFloat(amount);
     
     const newTransaction = {
       id: Date.now(),
       description,
-      amount,
+      amount: amountNum,
       type,
       category,
       date: today.toLocaleDateString(),
-      fullDate: today.toISOString() // Store full date for better parsing
+      fullDate: today.toISOString()
     };
+    
+    // Update balances immediately based on the new transaction
+    if (type === 'expense') {
+      if (debtCategories.includes(category)) {
+        if (hasManualDebt) {
+          // When in manual mode, update the manual balance
+          setManualDebtBalance(prev => Math.max(0, prev - amountNum));
+          setDebtBalance(prev => Math.max(0, prev - amountNum));
+        } else {
+          // When in automatic mode, just update the debt balance
+          setDebtBalance(prev => Math.max(0, prev - amountNum));
+        }
+      }
+      if (savingsCategories.includes(category)) {
+        if (hasManualSavings) {
+          // When in manual mode, update the manual balance
+          setManualSavingsBalance(prev => prev + amountNum);
+          setSavingsBalance(prev => prev + amountNum);
+        } else {
+          // When in automatic mode, just update the savings balance
+          setSavingsBalance(prev => prev + amountNum);
+        }
+      }
+    }
     
     setTransactions([...transactions, newTransaction]);
     setDescription('');
     setAmount('');
-    // Don't reset category as users often add multiple transactions of same category
   };
 
   const deleteTransaction = (id) => {
@@ -159,26 +183,50 @@ function App() {
   // Handle the debt balance form submission
   const handleDebtBalanceSubmit = (e) => {
     e.preventDefault();
+    const newDebtBalance = parseFloat(manualDebtBalance) || 0;
+    setManualDebtBalance(newDebtBalance);
     setHasManualDebt(true);
+    setDebtBalance(newDebtBalance);
     setEditingDebt(false);
   };
   
   // Handle the savings balance form submission
   const handleSavingsBalanceSubmit = (e) => {
     e.preventDefault();
+    const newSavingsBalance = parseFloat(manualSavingsBalance) || 0;
+    setManualSavingsBalance(newSavingsBalance);
     setHasManualSavings(true);
+    setSavingsBalance(newSavingsBalance);
     setEditingSavings(false);
   };
   
   // Reset to automatic tracking
   const resetDebtBalance = () => {
     setHasManualDebt(false);
+    setManualDebtBalance(0);
+    // Recalculate debt balance from transactions
+    const calculatedDebt = transactions.reduce((total, transaction) => {
+      if (transaction.type === 'expense' && debtCategories.includes(transaction.category)) {
+        return total - parseFloat(transaction.amount);
+      }
+      return total;
+    }, 0);
+    setDebtBalance(Math.max(0, calculatedDebt));
     setEditingDebt(false);
   };
   
   // Reset to automatic tracking
   const resetSavingsBalance = () => {
     setHasManualSavings(false);
+    setManualSavingsBalance(0);
+    // Recalculate savings balance from transactions
+    const calculatedSavings = transactions.reduce((total, transaction) => {
+      if (transaction.type === 'expense' && savingsCategories.includes(transaction.category)) {
+        return total + parseFloat(transaction.amount);
+      }
+      return total;
+    }, 0);
+    setSavingsBalance(calculatedSavings);
     setEditingSavings(false);
   };
 

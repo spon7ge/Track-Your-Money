@@ -453,10 +453,30 @@ input::placeholder {
 }
 
 .balance-edit-form input {
-  font-size: 1.2rem;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: #2d2d2d;
+  color: #e0e0e0;
   text-align: center;
-  font-weight: bold;
-  color: #4ade80;
+}
+
+/* Remove number input arrows */
+.balance-edit-form input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.balance-edit-form input[type="number"]::-webkit-outer-spin-button,
+.balance-edit-form input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove default zero placeholder */
+.balance-edit-form input[type="number"]::placeholder {
+  color: transparent;
 }
 
 .balance-edit-actions {
