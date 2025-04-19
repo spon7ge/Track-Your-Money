@@ -2,6 +2,8 @@
 
 A modern, user-friendly budgeting application built with React that helps you track your expenses, income, debt, and savings in real-time.
 
+![Budget Tracker Screenshot](public/screenshot.png)
+
 ## Features
 
 - 💰 **Real-time Balance Tracking**
