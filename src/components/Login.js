@@ -46,6 +46,7 @@ function Login() {
 
   return (
     <div className="login-container">
+      <h1 className="app-title">Track Your Money</h1>
       <div className="login-box">
         <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
         {error && <div className="error-message">{error}</div>}
