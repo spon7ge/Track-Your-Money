@@ -5,6 +5,15 @@ import { auth } from './firebase';
 import Login from './components/Login';
 import Header from './components/Header';
 import Charts from './components/Charts';
+import SignUp from './components/SignUp';
+import { 
+  trackAddTransaction, 
+  trackDeleteTransaction, 
+  trackUpdateDebtBalance, 
+  trackUpdateSavingsBalance,
+  trackViewCharts,
+  trackHideCharts
+} from './analytics';
 import './App.css';
 
 function App() {
@@ -47,9 +56,12 @@ function App() {
   }, [type, expenseCategories, incomeCategories]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Add a small delay to ensure Firebase is fully initialized
+      setTimeout(() => {
+        setUser(currentUser);
+        setLoading(false);
+      }, 500);
     });
 
     return () => unsubscribe();
@@ -173,12 +185,27 @@ function App() {
       }
     }
     
+    // Track transaction added
+    trackAddTransaction(type, category, amountNum);
+    
     setTransactions([...transactions, newTransaction]);
     setDescription('');
     setAmount('');
   };
 
   const deleteTransaction = (id) => {
+    // Find the transaction to be deleted first
+    const transactionToDelete = transactions.find(t => t.id === id);
+    
+    if (transactionToDelete) {
+      // Track transaction deleted
+      trackDeleteTransaction(
+        transactionToDelete.type, 
+        transactionToDelete.category, 
+        transactionToDelete.amount
+      );
+    }
+    
     setTransactions(transactions.filter(transaction => transaction.id !== id));
   };
 
@@ -193,27 +220,35 @@ function App() {
 
   // Toggle charts visibility
   const toggleCharts = () => {
-    setShowCharts(!showCharts);
+    const newShowCharts = !showCharts;
+    setShowCharts(newShowCharts);
+    
+    // Track chart visibility change
+    if (newShowCharts) {
+      trackViewCharts();
+    } else {
+      trackHideCharts();
+    }
   };
   
   // Handle the debt balance form submission
   const handleDebtBalanceSubmit = (e) => {
     e.preventDefault();
-    const newDebtBalance = parseFloat(manualDebtBalance) || 0;
-    setManualDebtBalance(newDebtBalance);
-    setHasManualDebt(true);
-    setDebtBalance(newDebtBalance);
     setEditingDebt(false);
+    setHasManualDebt(true); // Switch to manual mode
+    
+    // Track debt balance update
+    trackUpdateDebtBalance(manualDebtBalance, true);
   };
   
   // Handle the savings balance form submission
   const handleSavingsBalanceSubmit = (e) => {
     e.preventDefault();
-    const newSavingsBalance = parseFloat(manualSavingsBalance) || 0;
-    setManualSavingsBalance(newSavingsBalance);
-    setHasManualSavings(true);
-    setSavingsBalance(newSavingsBalance);
     setEditingSavings(false);
+    setHasManualSavings(true); // Switch to manual mode
+    
+    // Track savings balance update
+    trackUpdateSavingsBalance(manualSavingsBalance, true);
   };
   
   // Reset to automatic tracking
@@ -263,6 +298,7 @@ function App() {
         <Header user={user} />
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route 
             path="/" 
             element={

@@ -8,11 +8,12 @@ import {
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { trackLogin } from '../analytics';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
@@ -24,6 +25,7 @@ function Login() {
       if (isLogin) {
         // Sign in
         await signInWithEmailAndPassword(auth, email, password);
+        trackLogin('email');
       } else {
         // Sign up
         await createUserWithEmailAndPassword(auth, email, password);
@@ -38,6 +40,7 @@ function Login() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      trackLogin('google');
       navigate('/');
     } catch (error) {
       setError(error.message);
@@ -89,9 +92,9 @@ function Login() {
         </button>
         <button 
           className="toggle-btn"
-          onClick={() => setIsLogin(!isLogin)}
+          onClick={() => navigate('/signup')}
         >
-          {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+          Need an account? Sign Up
         </button>
       </div>
     </div>

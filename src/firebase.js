@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getAnalytics } from 'firebase/analytics';
+import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -14,6 +15,30 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Initialize auth first - this is critical for Google sign-in
 export const auth = getAuth(app);
+
+// Initialize other Firebase services
+export const database = getDatabase(app);
+
+// Initialize analytics last and asynchronously
+export let analytics = null;
+const initAnalytics = async () => {
+  try {
+    const analyticsSupported = await isSupported();
+    if (analyticsSupported) {
+      analytics = getAnalytics(app);
+      console.log('Firebase Analytics initialized');
+    } else {
+      console.log('Firebase Analytics not supported in this environment');
+    }
+  } catch (error) {
+    console.error('Error initializing Firebase Analytics:', error);
+  }
+};
+
+// Start analytics initialization but don't wait for it
+initAnalytics();
+
 export default app; 
