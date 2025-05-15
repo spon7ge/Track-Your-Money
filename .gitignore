@@ -6,9 +6,11 @@
 .pnp.js
 .json
 .env
+.txt
 
 # testing
 /coverage
+/.firebase
 
 # production
 /build
